@@ -2,11 +2,13 @@ name: Build and Push Docker Image
 
 on:
   push:
+    # Make sure this matches your branch name (main or master)
     branches: [ "main" ]
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  # FIX: We type the name manually in lowercase here
+  IMAGE_NAME: laughingmanatghvcs/minio-worker
 
 jobs:
   build:
@@ -31,4 +33,5 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ github.repository }}:latest
+          # FIX: We use the env variable (lowercase) instead of github.repository
+          tags: ghcr.io/${{ env.IMAGE_NAME }}:latest
