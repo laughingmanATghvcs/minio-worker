@@ -59,7 +59,7 @@ for message in consumer:
         record = records[0]
         bucket = record['s3']['bucket']['name']
         key = record['s3']['object']['key']     # Filename
-        size = record['s3']['object']['size']   # Size in Bytes
+        size = record['s3']['object'].get('size', 0)   # Size in Bytes
 
         print(f"Processing: {key} ({size} bytes)")
 
