@@ -7,6 +7,7 @@ from kafka import KafkaConsumer
 KAFKA_BROKER = os.environ.get("KAFKA_BROKER", "my-cluster-kafka-bootstrap.kafka.svc:9092")
 TOPIC = "my-notifications"
 DISCORD_WEBHOOK = os.environ.get("DISCORD_WEBHOOK")
+DISCORD_ALERTS_WEBHOOK = os.environ.get("DISCORD_ALERTS_WEBHOOK")
 PD_ROUTING_KEY = os.environ.get("PD_ROUTING_KEY")
 
 print(f"Starting Worker... listening to {TOPIC}")
@@ -34,7 +35,13 @@ def trigger_pagerduty(filename, error_message):
         print(f"PagerDuty Alert Sent: {r.status_code}")
     except Exception as e:
         print(f"Failed to send PagerDuty alert: {e}")
-
+    # 2. ALSO Send to Discord #infra-alerts
+    if DISCORD_ALERTS_WEBHOOK:
+        alert_msg = {
+            "content": f"🚨 **CRITICAL ALARM** 🚨\n**File:** `{filename}`\n**Error:** {error_message}\n<@&YOUR_ROLE_ID>" 
+            # <--- adding <@userid> or <@&roleid> will PING you in Discord!
+        }
+        requests.post(DISCORD_ALERTS_WEBHOOK, json=alert_msg)        
 # --- HELPER FUNCTION: Log to Discord ---
 def log_to_discord(message):
     requests.post(DISCORD_WEBHOOK, json={"content": message})
