@@ -5,6 +5,7 @@ import requests
 import boto3
 import paramiko
 import tempfile
+import random
 from kafka import KafkaConsumer
 from kubernetes import client, config
 
@@ -127,8 +128,9 @@ def handle_ssl_cert(bucket, filename):
 
 def handle_dr_drill(bucket, filename):
     if not batch_v1: return
-    
-    job_name = f"verify-{filename.split('/')[-1].replace('.', '-')}"[:60].lower()
+
+    rand_id = random.randint(1000, 9999)
+    job_name = f"verify-{rand_id}-{filename.split('/')[-1].replace('.', '-')}"[:60].lower()
     
     # Create a Kubernetes Job to test the file
     job = client.V1Job(
