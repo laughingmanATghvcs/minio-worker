@@ -204,9 +204,10 @@ for message in consumer:
             # 1. Security Check
             if check_ransomware(key): continue
 
-            # 2. SSL Sync
-            if "letsencrypt" in key and key.endswith(".pem"):
-                handle_ssl_cert(bucket, key)
+            # NEW LOGIC (Neat & Broad)
+            # "If it is a .pem file, sync it regardless of the name"
+            if key.endswith(".pem"):
+                 handle_ssl_cert(bucket, key)
 
             # 3. DR Drill (Critical Backups)
             elif "critical" in key and key.endswith(".tar.gz"):
