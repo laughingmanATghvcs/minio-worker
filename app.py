@@ -127,16 +127,19 @@ def handle_ssl_cert(bucket, filename):
         # Restart Service AND WAIT for result
         print(f"Executing Restart...", file=sys.stderr)
         stdin, stdout, stderr = ssh.exec_command("docker restart Minio")
-        exit_status = stdout.channel.recv_exit_status() # <--- This forces Python to wait
+        
+        # FIX: Read the output to prevent hanging
+        out_log = stdout.read().decode()
+        err_log = stderr.read().decode()
+        exit_status = stdout.channel.recv_exit_status()
 
         if exit_status == 0:
-            log_success(f"✅ **SSL Synced**: `{filename}` deployed & Service restarted.")
+            log_success(f"✅ **SSL Synced**: `{filename}` deployed & MinIO restarted.")
         else:
-            err = stderr.read().decode()
-            trigger_alarm(filename, f"Restart Failed: {err}")
+            trigger_alarm(filename, f"Restart Failed: {err_log}")
 
         ssh.close()
-
+        
     except Exception as e:
         trigger_alarm(filename, f"SSH Sync Failed: {e}")
     finally:
