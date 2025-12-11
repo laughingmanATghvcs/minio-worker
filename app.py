@@ -205,9 +205,9 @@ for message in consumer:
             if check_ransomware(key): continue
 
             # NEW LOGIC (Neat & Broad)
-            # "If it is a .pem file, sync it regardless of the name"
+            # 2. SSL Sync (Accept ANY .pem file)
             if key.endswith(".pem"):
-                 handle_ssl_cert(bucket, key)
+                handle_ssl_cert(bucket, key)
 
             # 3. DR Drill (Critical Backups)
             elif "critical" in key and key.endswith(".tar.gz"):
