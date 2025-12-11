@@ -37,8 +37,8 @@ try:
                       endpoint_url=S3_ENDPOINT,
                       aws_access_key_id=S3_ACCESS_KEY,
                       aws_secret_access_key=S3_SECRET_KEY,
-                      # FIX: Force Path Style addressing (Required for IP addresses)
-                      config=Config(signature_version='s3v4', s3_addressing_style='path')
+                      # FIX: Correct syntax for forcing path style
+                      config=Config(signature_version='s3v4', s3={'addressing_style': 'path'})
     )
     print("✅ MinIO Client Connected", file=sys.stderr)
 except Exception as e:
