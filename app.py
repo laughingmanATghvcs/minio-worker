@@ -6,6 +6,7 @@ import boto3
 import paramiko
 import tempfile
 import random
+import urllib3
 from kafka import KafkaConsumer
 from kubernetes import client, config
 from botocore.client import Config
@@ -31,13 +32,16 @@ REMOTE_KEY_PATH = "/etc/secret/ssh-private-key" # Mounted via K8s Secret
 # --- INITIALIZATION ---
 print(f"🚀 Worker Starting...", file=sys.stderr)
 
+# Suppress the "Unverified HTTPS" warnings in logs
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 # 1. Init MinIO Client
 try:
     s3 = boto3.client('s3',
                       endpoint_url=S3_ENDPOINT,
                       aws_access_key_id=S3_ACCESS_KEY,
                       aws_secret_access_key=S3_SECRET_KEY,
-                      # FIX: Explicitly set Region and Path Style to stop 400 Errors
+                      verify=False,  # <--- FIX: Accept Self-Signed Certs
                       region_name='us-east-1',
                       config=Config(signature_version='s3v4', s3={'addressing_style': 'path'})
     )
