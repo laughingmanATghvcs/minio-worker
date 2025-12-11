@@ -124,11 +124,18 @@ def handle_ssl_cert(bucket, filename):
         sftp.put(tmp.name, remote_path)
         sftp.close()
 
-        # Restart Service (Example: MinIO)
-        ssh.exec_command("docker restart Minio")
+        # Restart Service AND WAIT for result
+        print(f"Executing Restart...", file=sys.stderr)
+        stdin, stdout, stderr = ssh.exec_command("docker restart Minio")
+        exit_status = stdout.channel.recv_exit_status() # <--- This forces Python to wait
+
+        if exit_status == 0:
+            log_success(f"✅ **SSL Synced**: `{filename}` deployed & Service restarted.")
+        else:
+            err = stderr.read().decode()
+            trigger_alarm(filename, f"Restart Failed: {err}")
+
         ssh.close()
-        
-        log_success(f"✅ **SSL Synced**: `{filename}` copied to Unraid & Service restarted.")
 
     except Exception as e:
         trigger_alarm(filename, f"SSH Sync Failed: {e}")
