@@ -8,6 +8,7 @@ import tempfile
 import random
 from kafka import KafkaConsumer
 from kubernetes import client, config
+from botocore.client import Config
 
 # --- CONFIGURATION: KAFKA & ALERTS ---
 KAFKA_BROKER = os.environ.get("KAFKA_BROKER", "my-cluster-kafka-bootstrap.kafka.svc:9092")
@@ -35,7 +36,10 @@ try:
     s3 = boto3.client('s3',
                       endpoint_url=S3_ENDPOINT,
                       aws_access_key_id=S3_ACCESS_KEY,
-                      aws_secret_access_key=S3_SECRET_KEY)
+                      aws_secret_access_key=S3_SECRET_KEY,
+                      # FIX: Force Path Style addressing (Required for IP addresses)
+                      config=Config(signature_version='s3v4', s3_addressing_style='path')
+    )
     print("✅ MinIO Client Connected", file=sys.stderr)
 except Exception as e:
     print(f"❌ MinIO Connection Failed: {e}", file=sys.stderr)
